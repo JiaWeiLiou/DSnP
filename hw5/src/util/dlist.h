@@ -56,39 +56,93 @@ public:
       ~iterator() {} // Should NOT delete _node
 
       // TODO: implement these overloaded operators
-      const T& operator * () const { return *(this); }
+      const T& operator * () const { T temp = _node->_data; return temp; }
       T& operator * () { return _node->_data; }
-      iterator& operator ++ () { return *(this); }
-      iterator operator ++ (int) { return *(this); }
-      iterator& operator -- () { return *(this); }
-      iterator operator -- (int) { return *(this); }
+      iterator& operator ++ () { _node = _node->_next; return *(this); }
+      iterator operator ++ (int) { iterator temp = *this; _node = _node->_next; return temp; }
+      iterator& operator -- () { _node = _node->_prev; return *(this); }
+      iterator operator -- (int) { iterator temp = *this; _node = _node->_prev; return temp; }
 
-      iterator& operator = (const iterator& i) { return *(this); }
+      iterator& operator = (const iterator& i) { _node._data = i._node._data; return *(this); }
 
-      bool operator != (const iterator& i) const { return false; }
-      bool operator == (const iterator& i) const { return false; }
+      bool operator != (const iterator& i) const { return _node != i._node; }
+      bool operator == (const iterator& i) const { return _node == i._node; }
 
    private:
       DListNode<T>* _node;
    };
 
    // TODO: implement these functions
-   iterator begin() const { return 0; }
-   iterator end() const { return 0; }
-   bool empty() const { return false; }
-   size_t size() const {  return 0; }
+   iterator begin() const { return empty() ? iterator(_head) : iterator(_head->_next); }
+   iterator end() const { return iterator(_head); }
+   bool empty() const { return (_head->_prev == _head && _head->_next == _head) ? true : false; }
+   size_t size() const { 
+      size_t num = 0;
+      for (iterator i = begin(); i != end(); ++i) {
+         ++num;
+      }
+      return num;
+   }
 
-   void push_back(const T& x) { }
-   void pop_front() { }
-   void pop_back() { }
+   void push_back(const T& x) {
+      DListNode<T>* newObj = new DListNode<T>(x, _head->_prev, _head);
+      _head->_prev->_next = newObj;
+      _head->_prev = newObj;  
+    }
+   void pop_front() { erase(begin()); }
+   void pop_back() { erase(--end()); }
 
    // return false if nothing to erase
-   bool erase(iterator pos) { return false; }
-   bool erase(const T& x) { return false; }
+   bool erase(iterator pos) { 
+      if (empty()) {
+         return false;
+      } else {
+         pos._node->_prev->_next = pos._node->_next;
+         pos._node->_next->_prev = pos._node->_prev;
+         delete pos._node;
+         return true;
+      } 
+   }
 
-   void clear() { }  // delete all nodes except for the dummy node
+   bool erase(const T& x) {
+      if (empty()) {
+         return false;
+      } else {
+         iterator pos = begin();
+         while (pos._node != _head) {
+            if (*pos == x) {
+               erase(pos);
+               return true;
+            }
+            ++pos;
+         }
+      }
+   }
 
-   void sort() const { }
+   void clear() {
+      DListNode<T>* pos(_head->next);
+      while (pos != _head) {
+         pos = pos->_next;
+         delete pos->_prev;  
+      }
+      _head->_next = _head->_prev = _head;
+   }  // delete all nodes except for the dummy node
+
+   void sort() const {
+      iterator pos = begin();
+      for (size_t i = 0; i < size() - 1; ++i) {
+         for (size_t j = 0; j < size() - 1 - i; ++j) {
+            if (pos._node->_data > pos._node->_next->_data) {
+               T temp = pos._node->_data;
+               pos._node->_data = pos._node->_next->_data;
+               pos._node->_next->_data = temp;  
+            }
+            ++pos;
+         }
+         pos = begin();  
+      }
+      _isSorted = true;
+   }
 
 private:
    // [NOTE] DO NOT ADD or REMOVE any data member

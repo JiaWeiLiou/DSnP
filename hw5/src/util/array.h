@@ -21,8 +21,8 @@ class Array
 {
 public:
    // TODO: decide the initial value for _isSorted
-   Array() : _data(0), _size(0), _capacity(0) {}
-   ~Array() { delete []_data; }
+   Array() : _data(0), _size(0), _capacity(0) { _isSorted = false; }
+   ~Array() { delete [] _data; }
 
    // DO NOT add any more data member or function for class iterator
    class iterator
@@ -35,49 +35,104 @@ public:
       ~iterator() {} // Should NOT delete _node
 
       // TODO: implement these overloaded operators
-      const T& operator * () const { return (*this); }
+      const T& operator * () const { return *_node; }
       T& operator * () { return (*_node); }
-      iterator& operator ++ () { return (*this); }
-      iterator operator ++ (int) { return (*this); }
-      iterator& operator -- () { return (*this); }
-      iterator operator -- (int) { return (*this); }
+      iterator& operator ++ () { ++_node; return (*this); }
+      iterator operator ++ (int) { iterator temp = *this; ++_node; return (*this); }
+      iterator& operator -- () { --_node; return (*this); }
+      iterator operator -- (int) { iterator temp = *this; --_node; return (*this); }
 
-      iterator operator + (int i) const { return (*this); }
-      iterator& operator += (int i) { return (*this); }
+      iterator operator + (int i) const { return iterator(_node + i); }
+      iterator& operator += (int i) { _node += i; return (*this); }
 
-      iterator& operator = (const iterator& i) { return (*this); }
+      iterator& operator = (const iterator& i) { _node = i._node; return (*this); }
 
-      bool operator != (const iterator& i) const { return false; }
-      bool operator == (const iterator& i) const { return false; }
+      bool operator != (const iterator& i) const { return (_node != i._node); }
+      bool operator == (const iterator& i) const { return (_node == i._node); }
 
    private:
       T*    _node;
    };
 
    // TODO: implement these functions
-   iterator begin() const { return 0; }
-   iterator end() const { return 0; }
-   bool empty() const { return false; }
-   size_t size() const { return 0; }
+   iterator begin() const { return (_capacity == 0) ? 0 : iterator(_data); }
+   iterator end() const { return (_capacity == 0) ? 0 : iterator(_data + _size); }
+   bool empty() const { return !_size; }
+   size_t size() const { return _size; }
 
-   T& operator [] (size_t i) { return _data[0]; }
-   const T& operator [] (size_t i) const { return _data[0]; }
+   T& operator [] (size_t i) { return _data[i]; }
+   const T& operator [] (size_t i) const { return _data[i]; }
 
-   void push_back(const T& x) { }
-   void pop_front() { }
-   void pop_back() { }
+   void push_back(const T& x) {
+      if (_capacity == 0) {
+         reserve(1);  
+      } else {
+         reserve(_capacity * 2);  
+      }
+      *(_data+_size) = x;
+      ++_size;
+   }
+   
+   void pop_front() { erase(begin()); }
+   void pop_back() { erase(--end()); }
 
-   bool erase(iterator pos) { return false; }
-   bool erase(const T& x) { return false; }
+   bool erase(iterator pos) {
+      if (empty()) {
+         return false;  
+      } else {
+         *pos = *(--end());
+         --_size;
+         return true;  
+      }
+   }
 
-   void clear() { }
+   bool erase(const T& x) {
+      if (empty()) {
+         return false;  
+      } else {
+         for (size_t i = 0; i < _size; ++i) {
+            if (_data[i] == x) {
+               iterator pos = (begin() += i);
+               *pos = *(--end());
+               --_size;  
+               return true;
+            }  
+         }
+         return false;  
+      }
+   }
+
+   void clear() { _size = 0; }
 
    // [Optional TODO] Feel free to change, but DO NOT change ::sort()
    void sort() const { if (!empty()) ::sort(_data, _data+_size); }
 
    // Nice to have, but not required in this homework...
-   // void reserve(size_t n) { ... }
-   // void resize(size_t n) { ... }
+   void reserve(size_t n) {
+      if (n <= _capacity) {
+      } else {
+         T* reallocData = new T[n];
+         _capacity = n;
+         for (size_t i = 0; i < _size; ++i) {
+            *reallocData = *(_data + i);  
+         }
+         delete [] _data;
+         _data = reallocData;  
+      }
+   }
+   void resize(size_t n) {
+      if (n <= _size) {
+         for (size_t i = n; i < _size; ++i) {
+            (_data + i) = T();  
+         } else {
+            reserve(n);
+            for (size_t i = _size; i < n; ++i) {
+               _data[i] = T();
+            }
+         }  
+      }
+      _size = n;  
+   }
 
 private:
    // [NOTE] DO NOT ADD or REMOVE any data member
