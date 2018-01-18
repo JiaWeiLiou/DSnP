@@ -66,10 +66,10 @@ public:
    void push_back(const T& x) {
       if (_capacity == 0) {
          reserve(1);  
-      } else {
+      } else if (_capacity == _size) {
          reserve(_capacity * 2);  
       }
-      *(_data+_size) = x;
+      *(_data + _size) = x;
       ++_size;
    }
    
@@ -90,11 +90,9 @@ public:
       if (empty()) {
          return false;  
       } else {
-         for (size_t i = 0; i < _size; ++i) {
-            if (_data[i] == x) {
-               iterator pos = (begin() += i);
-               *pos = *(--end());
-               --_size;  
+         for (iterator i = begin(); i != end(); ++i) {
+            if (*i == x) {
+               erase(i);
                return true;
             }  
          }
@@ -105,7 +103,7 @@ public:
    void clear() { _size = 0; }
 
    // [Optional TODO] Feel free to change, but DO NOT change ::sort()
-   void sort() const { if (!empty()) ::sort(_data, _data+_size); }
+   void sort() const { if (!empty()) ::sort(_data, _data + _size); }
 
    // Nice to have, but not required in this homework...
    void reserve(size_t n) {

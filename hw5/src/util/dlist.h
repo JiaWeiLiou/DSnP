@@ -56,14 +56,14 @@ public:
       ~iterator() {} // Should NOT delete _node
 
       // TODO: implement these overloaded operators
-      const T& operator * () const { T temp = _node->_data; return temp; }
+      const T& operator * () const { return _node->_data; }
       T& operator * () { return _node->_data; }
       iterator& operator ++ () { _node = _node->_next; return *(this); }
       iterator operator ++ (int) { iterator temp = *this; _node = _node->_next; return temp; }
       iterator& operator -- () { _node = _node->_prev; return *(this); }
       iterator operator -- (int) { iterator temp = *this; _node = _node->_prev; return temp; }
 
-      iterator& operator = (const iterator& i) { _node._data = i._node._data; return *(this); }
+      iterator& operator = (const iterator& i) { _node = i._node; return *(this); }
 
       bool operator != (const iterator& i) const { return _node != i._node; }
       bool operator == (const iterator& i) const { return _node == i._node; }
@@ -108,13 +108,11 @@ public:
       if (empty()) {
          return false;
       } else {
-         iterator pos = begin();
-         while (pos._node != _head) {
-            if (*pos == x) {
-               erase(pos);
+         for (iterator i = begin(); i != end(); ++i) {
+            if (*i == x) {
+               erase(i);
                return true;
             }
-            ++pos;
          }
       }
    }
