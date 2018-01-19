@@ -122,11 +122,11 @@ public:
       if (n <= _size) {
          for (size_t i = n; i < _size; ++i) {
             (_data + i) = T();  
-         } else {
-            reserve(n);
-            for (size_t i = _size; i < n; ++i) {
-               _data[i] = T();
-            }
+         } 
+      } else {
+         reserve(n);
+         for (size_t i = _size; i < n; ++i) {
+            _data[i] = T();
          }  
       }
       _size = n;  

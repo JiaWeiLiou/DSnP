@@ -118,7 +118,7 @@ public:
    }
 
    void clear() {
-      DListNode<T>* pos(_head->next);
+      DListNode<T>* pos(_head->_next);
       while (pos != _head) {
          pos = pos->_next;
          delete pos->_prev;  
